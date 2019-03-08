@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset = "utf-8">
+  <script src="https://fb.me/react-0.14.3.js"></script>
+  <script src="https://fb.me/react-dom-0.14.3.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+</head>
+<style>
+  body {
+    background-color: black;
+    font-family: arial
+  }
+  #container {
+    width: 904px;
+    padding:40px;
+    margin-top: 60px;
+    margin-left:60px;
+    background-color: black;
+  }
+  .timeContainer {
+    width: 100px;
+    height: 170px;
+    background-image: linear-gradient(#555555, #333333);
+    background-image: -o-linear-gradient(#555555, #333333);
+    background-image: -moz-linear-gradient(#555555, #333333);
+    background-image: -webkit-linear-gradient(#555555, #333333);
+    border-radius: 10px;
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 114pt;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+  }
+  .separator {
+    width: 100px;
+    height: 170px;
+    display: inline-block;
+    margin-left: 10px;
+    font-size: 114pt;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+  }
+  .colon {
+    position:relative; top:-15px;
+  }
+.timerButton {
+    width: 210px;
+    height: 40px;
+    background-image: radial-gradient(#555555, #333333);
+    background-image: -o-radial-gradient(#555555, #333333);
+    background-image: -moz-radial-gradient(#555555, #333333);
+    background-image: -webkit-radial-gradient(#555555, #333333);
+    border: 2px solid #BBBBBB;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: center;
+    color: white;
+    margin-left: 120px;
+    margin-top: 20px;
+    cursor: pointer;
+  }
+  .timerButton:hover {
+    background-image: none;
+    background-color: #555555;
+  }
+  button:first-child {
+    margin-left: 10px;
+  }
+  #lapTimes {
+    font-size: 20pt;
+    color: white;
+    font-weight: bold;
+    width: 978px;
+    text-align: right;
+    margin-top: -30px;
+  }
+  .lap {
+    margin-top: 8px;
+  }
+  .rotated {
+    transform: rotate3d(0, 1, 0,40deg);
+  }
+</style>
+<body>
+<div id="myApp"></div>
+</body>
+<script type="text/babel">
+var MyApp = React.createClass({
+  getInitialState: function() {
+    return {
+      hundreths: 0,
+      tenths: 0,
+      singleSeconds: 0,
+      tenSeconds: 0,
+      singleMinutes: 0,
+      tenMinutes: 0,
+      timing: false,
+      laps: []
+    }
+  },
+  rotate: function(r, deg, e) {
+    var rotateInterval = setInterval(function(){
+      if (deg == 360) {
+        clearInterval(rotateInterval);
+      }
+      document.querySelectorAll(".timeContainer")[e].style.transform = "rotate3d(0, 1, 0," + deg + "deg)";
+      deg += 18;
+    },10);
+  },
+  setTiming: function () {
+    this.setState({timing: !this.state.timing});
+    setTimeout(this.startTimer,5);
+  },
+  startTimer: function() {
+    if (this.state.timing == false) {
+      return;
+    }
+    var h = this.state.hundreths;
+    var t = this.state.tenths;
+    var ss = this.state.singleSeconds;
+    var ts = this.state.tenSeconds;
+    var sm = this.state.singleMinutes;
+    var tm = this.state.tenMinutes;
+    h++;
+    if ( h == 10) {
+      h = 0;
+      t++;
+    }
+    if (t == 10) {
+      t = 0;
+      ss++;
+      this.rotate("singleSecondContainer",0,3);
+    }
+    if (ss == 10) {
+      ss = 0;
+      ts++;
+      this.rotate("singleSecondContainer",0,2);
+    }
+    if (ts == 6) {
+      ts = 0;
+      sm ++;
+      this.rotate("singleSecondContainer",0,1);
+    }
+    if (sm == 10) {
+      sm = 0;
+      tm ++;
+      this.rotate("singleSecondContainer",0,0);
+    }
+    this.setState({hundreths: h, tenths: t, singleSeconds: ss, tenSeconds: ts, singleMinutes: sm ,tenMinutes: tm});
+    if(tm != 6){
+      setTimeout(this.startTimer,10);
+    }
+  },
+  reset: function() {
+    this.setState({hundreths: 0, tenths: 0, singleSeconds: 0, tenSeconds: 0, singleMinutes: 0, tenMinutes:0, timing:false, laps: []});
+  },
+  lap: function() {
+    if (this.state.timing == true) {
+      var arr = this.state.laps;
+      arr.push(this.state.tenMinutes + "" + this.state.singleMinutes + ":" +  this.state.tenSeconds + "" + this.state.singleSeconds + "." + this.state.tenths + "" + this.state.hundreths);
+      this.setState({laps: arr});
+    }
+  },
+  displayLaps: function(text, i) {
+    return(
+      <div className="lap">Lap {i + 1} -  {text}</div>
+    )
+  },
+  render: function() {
+    return(
+      <div>
+        <div id="container">
+          <div className="timeContainer">{this.state.tenMinutes}</div>
+          <div className="timeContainer">{this.state.singleMinutes}</div>
+          <div className="separator"><span className="colon">:</span></div>
+          <div className="timeContainer">{this.state.tenSeconds}</div>
+          <div className="timeContainer">{this.state.singleSeconds}</div>
+          <div className="separator"><span className="colon">:</span></div>
+          <div className="timeContainer">{this.state.tenths}</div>
+          <div className="timeContainer">{this.state.hundreths}</div>
+          <div id="buttons">
+            <button className="timerButton" onClick={this.setTiming}>START/STOP</button>
+            <button className="timerButton" onClick={this.reset}>RESET</button>
+            <button className="timerButton" onClick={this.lap}>LAP</button>
+          </div>
+        </div>
+        <div id="lapTimes">{this.state.laps.map(this.displayLaps)}</div>
+      </div>
+    )
+  }
+});
+ReactDOM.render(<MyApp/>,document.getElementById("myApp"));
+</script>
+</html>

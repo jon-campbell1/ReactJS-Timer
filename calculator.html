@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset = "utf-8">
+  <script src="https://fb.me/react-0.14.3.js"></script>
+  <script src="https://fb.me/react-dom-0.14.3.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script>
+  <style>
+
+  *{
+    font-family:arial;
+  }
+
+  #container{
+    width: 320px;
+    position: relative; left: 50%; top: 50px;
+    margin-left: -160px;
+  }
+
+  #intro{
+    font-size: 14pt;
+  }
+
+  #numberInput{
+   width: 320px;
+   height: 100px;
+   font-size: 50pt;
+   padding: 10px 10px 10px 10px;
+   box-sizing: border-box;
+   text-align: right;
+   font-weight:bold;
+   color: white;
+   border: 2px solid #15D5D5;
+   background-color: rgba(49,133,133,1);
+   display: inline-block;
+  }
+
+  #clearButton{
+    border: 2px solid #15D5D5;
+    border-top: 0px;
+    width: 240px;
+    font-size: 24pt;
+    padding: 20px;
+    height: 80px;
+    color: rgba(0,100,100,1);
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    display: inline-block;
+  }
+
+  #clearButton:hover, .numberButton:hover, .operatorButton:hover{
+    background-color: rgba(49,168,168,1);
+    color:white;
+  }
+
+  #clearButton:active, .numberButton:active, .operatorButton:active{
+    background-color:  rgba(151,236,236,1);
+    color:white;
+  }
+
+  .operatorButton{
+    border: 2px solid #15D5D5;
+    border-top: 0px;
+    width: 80px;
+    height:80px;
+    font-size: 24pt;
+    padding: 20px;
+    color: rgba(0,100,100,1);
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    border-left: 0px;
+    background-color: rgba(134,216,216,1);
+    display: inline-block;
+  }
+
+  .numberButton{
+    border: 2px solid #15D5D5;
+    border-top: 0px;
+    width: 80px;
+    height:80px;
+    border-left: 0px;
+    font-size: 24pt;
+    padding: 20px;
+    color: rgba(0,100,100,1);
+    cursor: pointer;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    background-color: white;
+    display: inline-block;
+  }
+
+  .numberButton:first-child{
+    border-left: 2px solid #15D5D5;
+  }
+
+  #Del{
+    font-size:18pt;
+  }
+
+  </style>
+</head>
+<body>
+
+  <div id="myApp"></div>
+
+  <script type="text/babel">
+
+var NumberButton = React.createClass({
+
+  displayNumber: function() {
+    this.props.displayNum(this.props.numberText);
+  },
+
+  render: function() {
+    return (
+      <div className="numberButton"onClick={this.displayNumber}><span id={this.props.numberText}>{this.props.numberText}</span></div>
+    )
+  }
+
+});
+
+  var MyApp = React.createClass({
+
+    getInitialState: function() {
+      return {
+        displayNumber:"0",
+        storedNumber : 0,
+        isTyping: false,
+        operation: false
+      }
+    },
+
+    displayNumber: function(n) {
+      var val = this.state.displayNumber.toString();
+      if (n == "." && val.indexOf(".") > -1) {
+        return;
+      }
+      if (n == "Del") {
+        var newString = this.state.displayNumber.toString().substring(0,val.length-1);
+        if (newString.length == 0 || this.state.displayNumber == "Infinity") {
+          n = "0";
+        } else {
+          n = newString;
+          if (n.substring(n.length-1) == ".") {
+            n = n.replace(".","");
+          }
+        }
+        this.setState({displayNumber:n, isTyping: false});
+        return;
+      }
+      if (val.length < 8 || this.state.operation) {
+        if ((val == "0" || this.state.operation) && this.state.isTyping == false) {
+          if (n == ".") {
+            n = "0.";
+          }
+          this.setState({displayNumber:n, isTyping: true});
+        } else {
+          this.setState({displayNumber: val + n, isTyping: true});
+        }
+      }
+    },
+
+    clear: function() {
+      this.setState({displayNumber: "0", storedNumber:  0, operation: false});
+    },
+
+    add: function() {
+      if(this.state.operation == "add"){
+        var num = parseFloat(this.state.storedNumber) + parseFloat(this.state.displayNumber);
+        this.setState({displayNumber: num, storedNumber: num, operation: "add", isTyping: false});
+        return;
+      }
+      this.setOperation(this.state.displayNumber,"add");
+    },
+
+    subtract: function() {
+      if(this.state.operation == "subtract"){
+        var num = parseFloat(this.state.storedNumber) - parseFloat(this.state.displayNumber);
+        this.setState({displayNumber: num, storedNumber: num, operation: "subtract", isTyping: false});
+        return;
+      }
+      this.setOperation(this.state.displayNumber,"subtract");
+    },
+
+    divide: function() {
+      if(this.state.operation == "divide"){
+        var num = parseFloat(this.state.storedNumber) / parseFloat(this.state.displayNumber);
+        this.setState({displayNumber: num, storedNumber: num, operation: "divide", isTyping: false});
+        return;
+      }
+      this.setOperation(this.state.displayNumber,"divide");
+    },
+
+    multiply: function() {
+      if(this.state.operation == "multiply"){
+        var num = parseFloat(this.state.storedNumber) * parseFloat(this.state.displayNumber);
+        this.setState({displayNumber: num, storedNumber: num, operation: "multiply", isTyping: false});
+        return;
+      }
+      this.setOperation(this.state.displayNumber,"multiply");
+    },
+
+    setOperation: function(n,o) {
+      this.setState({storedNumber:n, operation: o, isTyping: false});
+    },
+
+    equals: function() {
+      var s = parseFloat(this.state.storedNumber);
+      var d = parseFloat(this.state.displayNumber)
+      if (this.state.operation == "add") {
+        var num = s + d;
+      }
+      if (this.state.operation == "subtract") {
+        var num = s - d;
+      }
+      if (this.state.operation == "divide") {
+        var num = s / d;
+      }
+      if (this.state.operation == "multiply") {
+        var num = s * d;
+      }
+      this.setState({displayNumber: num.toString().substring(0,8), storedNumber: 0, operation: false, isTyping:false});
+    },
+
+    handleKeys: function(evt) {
+      evt = evt || window.event;
+      var charCode = evt.keyCode || evt.which;
+      if( evt.keyCode == 8 || evt.keyCode == 46 ) {
+        this.displayNumber("Del");
+      }
+      var charStr = String.fromCharCode(charCode);
+      if((!isNaN(parseFloat(charStr)) && isFinite(charStr)) || charStr == "." || charStr == "¾") {
+        if(charStr == "." || charStr == "¾"){
+          this.displayNumber(".");
+          return;
+        }
+        this.displayNumber(charStr);
+      }
+    },
+
+    render: function() {
+      document.addEventListener("keydown",this.handleKeys,false);
+      return (
+        <div id="container">
+          <div id="numberInput">{this.state.displayNumber}</div>
+          <div id="clearButton" onClick={this.clear}>CLEAR</div>
+          <div className="operatorButton" onClick={this.divide}>÷</div>
+          <div className="buttonRow">
+            <NumberButton numberText="7" displayNum={this.displayNumber}/>
+            <NumberButton numberText="8" displayNum={this.displayNumber}/>
+            <NumberButton numberText="9" displayNum={this.displayNumber}/>
+            <div className="operatorButton" onClick={this.subtract}>-</div>
+          </div>
+          <div className="buttonRow">
+            <NumberButton numberText="4" displayNum={this.displayNumber}/>
+            <NumberButton numberText="5" displayNum={this.displayNumber}/>
+            <NumberButton numberText="6" displayNum={this.displayNumber}/>
+            <div className="operatorButton" onClick={this.add}>+</div>
+          </div>
+          <div className="buttonRow">
+            <NumberButton numberText="1" displayNum={this.displayNumber}/>
+            <NumberButton numberText="2" displayNum={this.displayNumber}/>
+            <NumberButton numberText="3" displayNum={this.displayNumber}/>
+            <div className="operatorButton" onClick={this.multiply}>x</div>
+          </div>
+          <div className="buttonRow">
+            <NumberButton numberText="." displayNum={this.displayNumber}/>
+            <NumberButton numberText="0" displayNum={this.displayNumber}/>
+            <NumberButton numberText="Del" displayNum={this.displayNumber}/>
+            <div className="operatorButton" onClick={this.equals}>=</div>
+          </div>
+        </div>);
+    }
+
+  });
+  ReactDOM.render(<MyApp/>,document.getElementById("myApp"));
+  </script>
+
+</body>
+</html>
